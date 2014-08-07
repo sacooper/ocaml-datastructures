@@ -6,7 +6,7 @@ module Trie : sig
   val mem : 'a trie -> string -> bool
   val insert : 'a trie -> string -> 'a -> 'a trie
   val remove : 'a trie -> string -> 'a trie
-(*   val fold : 'a trie -> (char -> 'a option -> 'b -> 'b) -> 'b -> 'b *)
+  val fold : 'a trie -> (string -> 'a -> 'b -> 'b) -> 'b -> 'b
 
 end = struct
   module CharMap = Map.Make(Char)
@@ -50,8 +50,11 @@ end = struct
           aux (fun x -> cont (Trie(v, CharMap.add (s.[i]) x map))) (i+1) (CharMap.find (s.[i]) map)
     in aux (fun x -> x) 0 t
 
-(*     let rec fold : 'a trie -> (char -> 'a option -> 'b -> 'b) -> 'b -> 'b =
-    fun Trie(v, map) f init ->  *)
+    let rec fold : 'a trie -> (string -> 'a -> 'b -> 'b) -> 'b -> 'b =
+    fun t f init -> let rec aux acc = function
+      | Trie(None, map) -> 
+      | _ -> expr2
+    in aux "" t init
     
 
 end
