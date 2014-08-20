@@ -37,10 +37,8 @@ let insert : type a. a tree -> a -> a tree = fun (Tree t) v ->
  	| BNode(RNode(n, y, c), z, d) when v < y -> begin match aux n with
 		| Red(RNode(a, x, b)) -> Red(RNode(BNode(a, x, b), y, BNode(c, z, d)))
 		| Black n -> Black(BNode(RNode(n, y, c), z, d))
-		| InvalidL(l, v, r) ->
-			Red(RNode(BNode(l, v, r), y, BNode(c, z, d)))
-		| InvalidR(l, v, r) ->
-			Red(RNode(BNode(l, v, r), y, BNode(c, z, d)))
+		| InvalidL(l, v, r) -> Red(RNode(BNode(l, v, r), y, BNode(c, z, d)))
+		| InvalidR(l, v, r) -> Red(RNode(BNode(l, v, r), y, BNode(c, z, d)))
 		end
 	| BNode(RNode(a, x, n), z, d) when x < v && v < z-> begin match aux n with
 		| Red(RNode(b, y, c)) -> Red(RNode(BNode(a, x, b), y, BNode(c, z, d)))
@@ -95,6 +93,7 @@ let insert : type a. a tree -> a -> a tree = fun (Tree t) v ->
 		| Black(n) -> Red(RNode(a, x, n))
 		| _ -> assert false
 		end
+
 	(* Base Cases *)
 	| BNode(Nil, x, b) when v < x -> Black(BNode(RNode(Nil, v, Nil), x, b))
 	| BNode(a, x, Nil) when x < v -> Black(BNode(a, x, RNode(Nil, v, Nil)))
@@ -108,6 +107,8 @@ let insert : type a. a tree -> a -> a tree = fun (Tree t) v ->
 	| InvalidR(l, v, r) -> Tree(BNode(l, v, r))
 
 let check : type a. a tree -> unit = fun (Tree n) ->
+	(* Only need to check that ∀ n : node, 
+		value left_child(n) < value n < value right_child(n)*)
 	let get_value : type c n. (c, n, a) node -> a = fun n -> match n with
 	| RNode(_, v, _) -> v
 	| BNode(_, v, _) -> v 
@@ -124,3 +125,33 @@ let check : type a. a tree -> unit = fun (Tree n) ->
 	| RNode(l, v, r) -> assert(v < get_value r); assert(v > get_value l); f l; f r
 in f n
 
+let to_list : type a. a tree -> a list = fun (Tree n) ->
+	let rec aux : type c n. (c, n, a) node -> a list -> a list = fun n acc-> match n with
+	| Nil -> acc
+	| RNode(l, v, r) -> aux l (v :: (aux r acc))
+	| BNode(l, v, r) -> aux l (v :: (aux r acc))
+in aux n []
+
+(* in-order traversal *)
+let fold : type a b c. (a -> b -> b) -> a tree -> b -> b = fun f (Tree n) init ->
+	let rec aux : type co n. (co, n, a) node -> b -> b = fun n acc -> match n with
+	| Nil -> acc
+	| RNode(l, v, r) -> aux r (f v (aux l acc))
+	| BNode(l, v, r) -> aux r (f v (aux l acc))
+in aux n init
+
+(* Post-order traversal *)
+let fold_post : type a b c. (a -> b -> b) -> a tree -> b -> b = fun f (Tree n) init ->
+	let rec aux : type co n. (co, n, a) node -> b -> b = fun n acc -> match n with
+	| Nil -> acc
+	| RNode(l, v, r) -> f v (aux r (aux l acc))
+	| BNode(l, v, r) -> f v (aux r (aux l acc))
+in aux n init
+
+(* pre-order traversal *)
+let fold_pre : type a b c. (a -> b -> b) -> a tree -> b -> b = fun f (Tree n) init ->
+	let rec aux : type co n. (co, n, a) node -> b -> b = fun n acc -> match n with
+	| Nil -> acc
+	| RNode(l, v, r) -> aux l (aux r (f v acc))
+	| BNode(l, v, r) -> aux l (aux r (f v acc))
+in aux n init

@@ -1,4 +1,4 @@
-(*s A trie is a tree-like structure to implement dictionaries over
+(*  A trie is a tree-like structure to implement dictionaries over
     keys which have list-like structures. The idea is that each node
     branches on an element of the list and stores the value associated
     to the path from the root, if any. Therefore, a trie can be
